@@ -1,17 +1,17 @@
-- name: จัดทัพและบิลด์แบบทีเดียวจบ
+- name: Force Bundle All Native Libs
         run: |
-          # 1. ย้ายไฟล์ .so ทั้งหมดเข้าโฟลเดอร์มาตรฐาน (ถ้ามีอยู่แล้วจะทับให้)
+          # ล้างของเก่าทิ้งก่อน
+          rm -rf app/src/main/jniLibs
           mkdir -p app/src/main/jniLibs/arm64-v8a
+          
+          # กวาดไฟล์ .so ทุกที่มาลงที่นี่ และแสดงรายชื่อออกมาดูใน Log ด้วย
           find . -name "*.so" -exec cp -v {} app/src/main/jniLibs/arm64-v8a/ \;
+          
+          # ตรวจสอบว่าใน jniLibs มีไฟล์อะไรบ้าง (ดูในหน้า Actions ตอนรัน)
+          ls -R app/src/main/jniLibs/
 
-          # 2. บังคับให้ Gradle มองเห็น jniLibs โดยสร้างไฟล์ gradle.properties ชั่วคราว
+      - name: Build and Keep Libs Uncompressed
+        run: |
+          # บังคับให้ Android ไม่บีบอัดไฟล์ .so (ลดอาการเด้งได้ชะงัด)
           echo "android.bundle.enableUncompressedNativeLibs=false" >> gradle.properties
-
-          # 3. เริ่มบิลด์
-          ./gradlew assembleDebug
-
-      - name: อัปโหลด APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: NongMol-Final-Build
-          path: app/build/outputs/apk/debug/app-debug.apk
+          ./gradlew assembleDebug --stacktrace
