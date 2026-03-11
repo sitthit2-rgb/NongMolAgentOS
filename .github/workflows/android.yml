@@ -1,13 +1,17 @@
-- name: จัดเตรียมไฟล์ Library
+- name: จัดทัพและบิลด์แบบทีเดียวจบ
         run: |
+          # 1. ย้ายไฟล์ .so ทั้งหมดเข้าโฟลเดอร์มาตรฐาน (ถ้ามีอยู่แล้วจะทับให้)
           mkdir -p app/src/main/jniLibs/arm64-v8a
-          find . -name "*.so" -exec cp {} app/src/main/jniLibs/arm64-v8a/ \;
+          find . -name "*.so" -exec cp -v {} app/src/main/jniLibs/arm64-v8a/ \;
 
-      - name: สร้างด้วย Gradle
-        run: ./gradlew assembleDebug
+          # 2. บังคับให้ Gradle มองเห็น jniLibs โดยสร้างไฟล์ gradle.properties ชั่วคราว
+          echo "android.bundle.enableUncompressedNativeLibs=false" >> gradle.properties
+
+          # 3. เริ่มบิลด์
+          ./gradlew assembleDebug
 
       - name: อัปโหลด APK
         uses: actions/upload-artifact@v4
         with:
-          name: NongMol-Final-App
+          name: NongMol-Final-Build
           path: app/build/outputs/apk/debug/app-debug.apk
