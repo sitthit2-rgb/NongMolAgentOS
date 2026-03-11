@@ -1,13 +1,8 @@
 package com.example.nongmolagentos
-
+import android.app.Activity
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
-import com.example.nongmolagentos.service.OverlayUI
-
-class MainActivity : AppCompatActivity() {
+class MainActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val overlay = OverlayUI(this)
-        overlay.show()
     }
 }
