@@ -1,0 +1,57 @@
+
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.example.nongmolagentos'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.example.nongmolagentos"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0-alpha-001"
+
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++17"
+                // กำหนดให้ใช้ C++ Shared Library เพื่อรองรับ libllama
+                arguments "-DANDROID_STL=c++_shared"
+            }
+        }
+        ndk {
+            // บังคับให้บิลด์เฉพาะ 64-bit ตามไฟล์ .so ที่เรามี
+            abiFilters 'arm64-v8a'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+        }
+    }
+
+    // ตั้งค่าให้ระบบเห็นไฟล์ .so ใน jniLibs
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['src/main/jniLibs']
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+}
