@@ -16,7 +16,20 @@ android {
             cmake { cppFlags "-std=c++17" }
         }
     }
+    
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
     externalNativeBuild {
         cmake { path "src/main/cpp/CMakeLists.txt" }
     }
+}
+
+dependencies {
+    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 }
