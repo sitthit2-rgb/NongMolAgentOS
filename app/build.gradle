@@ -3,10 +3,12 @@ plugins {
 }
 
 android {
+    externalNativeBuild { cmake { path "src/main/cpp/CMakeLists.txt" } }
     namespace 'com.nongmol.agent.v2'
     compileSdk 34
 
     defaultConfig {
+        externalNativeBuild { cmake { cppFlags "-std=c++17" } }
         applicationId "com.nongmol.agent.v2"
         minSdk 26
         targetSdk 34
