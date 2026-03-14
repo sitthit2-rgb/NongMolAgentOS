@@ -3,84 +3,69 @@ package com.nongmol.agent.v2;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.view.Gravity;
-import android.view.View;
 import android.widget.*;
 import java.io.File;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
 
 public class MainActivity extends Activity {
-    private final String BASE_PATH = "/storage/emulated/0/002";
+    private final String BASE_PATH = Environment.getExternalStorageDirectory().getPath() + "/002";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        // ขอสิทธิ์เข้าถึงไฟล์ทั้งหมด (สำหรับ Android 11+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivity(intent);
+            }
+        }
+
+        setupUI();
+    }
+
+    private void setupUI() {
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setBackgroundColor(Color.parseColor("#121212"));
         root.setPadding(60, 100, 60, 60);
-        root.setGravity(Gravity.CENTER_HORIZONTAL);
 
-        TextView logo = new TextView(this);
-        logo.setText("NONGMOL AGENT\nNEURAL LINK v2");
-        logo.setTextSize(26);
-        logo.setTypeface(null, Typeface.BOLD);
-        logo.setTextColor(Color.WHITE);
-        logo.setGravity(Gravity.CENTER);
-        logo.setPadding(0, 0, 0, 80);
-        root.addView(logo);
+        TextView statusLabel = new TextView(this);
+        statusLabel.setText("--- SYSTEM DIAGNOSTIC ---");
+        statusLabel.setTextColor(Color.GRAY);
+        root.addView(statusLabel);
 
-        // System Status Card
-        LinearLayout card = createStyledCard();
-        String[] nodes = {"Brain (Llama3)", "Engine (Llama.so)", "Vision (GGUF)", "Ear (Whisper)"};
-        String[] paths = {BASE_PATH+"/models/brain_llama3.gguf", BASE_PATH+"/engine/libllama.so", BASE_PATH+"/models/vision_llama3.gguf", BASE_PATH+"/ear/whisper_base.bin"};
-        
-        for (int i=0; i<nodes.length; i++) {
-            boolean ok = new File(paths[i]).exists();
+        // เช็กไฟล์ในเครื่องจริงๆ
+        String[] files = {BASE_PATH+"/models/brain_llama3.gguf", BASE_PATH+"/ear/whisper_base.bin"};
+        String[] names = {"BRAIN CONNECTED", "EAR CONNECTED"};
+
+        for(int i=0; i<files.length; i++) {
+            File file = new File(files[i]);
             TextView tv = new TextView(this);
-            tv.setText((ok ? "● " : "○ ") + nodes[i]);
-            tv.setTextColor(ok ? Color.parseColor("#00FFCC") : Color.parseColor("#FF4444"));
-            tv.setPadding(20, 15, 20, 15);
-            card.addView(tv);
+            if(file.exists()) {
+                tv.setText("✅ " + names[i]);
+                tv.setTextColor(Color.GREEN);
+            } else {
+                tv.setText("❌ Missing: " + files[i]);
+                tv.setTextColor(Color.RED);
+            }
+            root.addView(tv);
         }
-        root.addView(card);
 
-        // Actions
-        root.addView(createStyledButton("ACTIVATE PERMISSIONS", v -> {
+        Button btn = new Button(this);
+        btn.setText("START NEURAL AGENT");
+        btn.setOnClickListener(v -> {
             startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
-        }));
+            Toast.makeText(this, "กรุณาเปิด 'NongMol Agent' ในรายการ", Toast.LENGTH_LONG).show();
+        });
+        root.addView(btn);
 
         setContentView(root);
-    }
-
-    private LinearLayout createStyledCard() {
-        LinearLayout l = new LinearLayout(this);
-        l.setOrientation(LinearLayout.VERTICAL);
-        l.setPadding(40, 40, 40, 40);
-        GradientDrawable gd = new GradientDrawable();
-        gd.setColor(Color.parseColor("#1E1E1E"));
-        gd.setCornerRadius(30f);
-        l.setBackground(gd);
-        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-1, -2);
-        p.setMargins(0, 0, 0, 80);
-        l.setLayoutParams(p);
-        return l;
-    }
-
-    private Button createStyledButton(String text, View.OnClickListener clk) {
-        Button b = new Button(this);
-        b.setText(text);
-        b.setTextColor(Color.BLACK);
-        b.setTypeface(null, Typeface.BOLD);
-        GradientDrawable gd = new GradientDrawable();
-        gd.setColor(Color.parseColor("#00FFCC"));
-        gd.setCornerRadius(15f);
-        b.setBackground(gd);
-        b.setOnClickListener(clk);
-        return b;
     }
 }
