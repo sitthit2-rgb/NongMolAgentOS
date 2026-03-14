@@ -5,18 +5,18 @@ plugins {
 android {
     namespace 'com.nongmol.agent.v2'
     compileSdk 34
+
     defaultConfig {
         applicationId "com.nongmol.agent.v2"
-        minSdk 24
+        minSdk 26
         targetSdk 34
-        versionCode 2
-        versionName "13.0"
+        versionCode 1
+        versionName "3.0"
+        externalNativeBuild {
+            cmake { cppFlags "-std=c++17" }
+        }
     }
-}
-
-dependencies {
-    implementation "com.squareup.okhttp3:okhttp:4.12.0"
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.9.0'
-    implementation project(':nongmol-core')
+    externalNativeBuild {
+        cmake { path "src/main/cpp/CMakeLists.txt" }
+    }
 }
