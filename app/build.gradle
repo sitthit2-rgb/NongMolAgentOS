@@ -10,26 +10,27 @@ android {
         applicationId "com.nongmol.agent.v2"
         minSdk 24
         targetSdk 33
-        versionCode 6
-        versionName "6.1"
-        externalNativeBuild {
-            cmake { cppFlags "" }
-        }
+        versionCode 1
+        versionName "1.0"
     }
 
     buildTypes {
         release {
             minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    externalNativeBuild {
-        cmake { path "src/main/cpp/CMakeLists.txt" }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
 }
 
 dependencies {
-    // เพิ่มบรรทัดนี้เพื่อแก้ปัญหา Theme.MaterialComponents ไม่พบ
-    implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    
+    // 💡 ตัวสำคัญที่หายไป:
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
 }
