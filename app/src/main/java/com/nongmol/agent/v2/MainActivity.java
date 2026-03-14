@@ -2,92 +2,80 @@ package com.nongmol.agent.v2;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.*;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import com.nongmol.core.NongMolCore;
+import android.view.Gravity;
+import java.io.File;
 
 public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        ScrollView scroll = new ScrollView(this);
-        final LinearLayout root = new LinearLayout(this);
+        // สร้างโฟลเดอร์ภายในแอป (ไม่ต้องขอสิทธิ์ไฟล์ภายนอก)
+        File modelDir = new File(getFilesDir(), "models");
+        if (!modelDir.exists()) modelDir.mkdirs();
+
+        LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(60, 80, 60, 80);
-        root.setBackgroundColor(Color.parseColor("#050508")); 
-        
+        root.setBackgroundColor(Color.parseColor("#050508"));
+
         TextView header = new TextView(this);
-        header.setText("NONGMOL AGENT V15.2");
-        header.setTextSize(32);
+        header.setText("NONGMOL AGENT V15.5");
+        header.setTextSize(28);
         header.setTextColor(Color.parseColor("#00FFCC"));
-        header.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
+        header.setGravity(Gravity.CENTER);
+        header.setTypeface(Typeface.DEFAULT_BOLD);
         root.addView(header);
 
-        addDivider(root);
+        // แสดง Path ที่พี่ต้องเอาไฟล์ไปวาง
+        TextView pathLabel = new TextView(this);
+        pathLabel.setText("\n📂 ที่เก็บโมเดล (นำไฟล์มาวางที่นี่):");
+        pathLabel.setTextColor(Color.WHITE);
+        root.addView(pathLabel);
 
-        // แสดงสถานะ (จะอัปเดตเมื่อเปิดแอป)
-        addStatusCard(root, "🧠 CORE BRAIN", NongMolCore.INSTANCE.getBRAIN_PATH());
-        addStatusCard(root, "👁️ VISION EYE", NongMolCore.INSTANCE.getVISION_PATH());
-        addStatusCard(root, "🦾 CLAW MOBILE", NongMolCore.INSTANCE.getENGINE_PATH());
-        addStatusCard(root, "👂 WHISPER EAR", NongMolCore.INSTANCE.getEAR_PATH());
+        TextView pathValue = new TextView(this);
+        pathValue.setText(modelDir.getAbsolutePath());
+        pathValue.setTextColor(Color.YELLOW);
+        pathValue.setTextSize(12);
+        pathValue.setTextIsSelectable(true); // ให้กดค้างก๊อปปี้ได้
+        root.addView(pathValue);
 
-        // ปุ่มกระตุ้นระบบประสาท (เพิ่มระบบ Click แล้ว!)
-        Button btnBoot = new Button(this);
-        btnBoot.setText("CONNECT NEURAL LINK");
-        btnBoot.setBackgroundColor(Color.parseColor("#00FFCC"));
-        btnBoot.setTextColor(Color.BLACK);
-        
-        btnBoot.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "⚡ ยินดีต้อนรับ! กำลังเชื่อมต่อเส้นประสาท...", Toast.LENGTH_SHORT).show();
-                // ตรงนี้สามารถใส่คำสั่งเริ่มทำงานของโมเดลได้เลยครับ
-            }
-        });
+        root.addView(createStatusRow("🧠 BRAIN", new File(modelDir, "brain.gguf")));
+        root.addView(createStatusRow("👁️ VISION", new File(modelDir, "vision.gguf")));
+        root.addView(createStatusRow("👂 EAR", new File(modelDir, "whisper.bin")));
 
-        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(-1, -120);
-        btnParams.setMargins(0, 60, 0, 0);
-        root.addView(btnBoot, btnParams);
-
-        scroll.addView(root);
-        setContentView(scroll);
-    }
-
-    private void addStatusCard(LinearLayout root, String label, java.io.File file) {
-        LinearLayout card = new LinearLayout(this);
-        card.setOrientation(LinearLayout.HORIZONTAL);
-        card.setPadding(30, 45, 30, 45);
+        Button btnCheck = new Button(this);
+        btnCheck.setText("RE-SCAN MODELS");
+        btnCheck.setBackgroundColor(Color.parseColor("#00FFCC"));
+        btnCheck.setTextColor(Color.BLACK);
+        btnCheck.setOnClickListener(v -> recreate());
         
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
-        params.setMargins(0, 15, 0, 15);
-        card.setLayoutParams(params);
-        card.setBackgroundColor(Color.parseColor("#12121A"));
+        params.setMargins(0, 50, 0, 0);
+        root.addView(btnCheck, params);
 
+        setContentView(root);
+    }
+
+    private LinearLayout createStatusRow(String label, File file) {
+        LinearLayout row = new LinearLayout(this);
+        row.setPadding(0, 20, 0, 20);
+        
         TextView tvLabel = new TextView(this);
         tvLabel.setText(label);
-        tvLabel.setTextColor(Color.LTGRAY);
-        tvLabel.setLayoutParams(new LinearLayout.LayoutParams(0, -2, 1.0f));
-
+        tvLabel.setTextColor(Color.WHITE);
+        tvLabel.setLayoutParams(new LinearLayout.LayoutParams(0, -2, 1f));
+        
         TextView tvStatus = new TextView(this);
         boolean exists = file.exists();
         tvStatus.setText(exists ? "● ONLINE" : "○ OFFLINE");
         tvStatus.setTextColor(exists ? Color.GREEN : Color.RED);
-        tvStatus.setTypeface(null, Typeface.BOLD);
-
-        card.addView(tvLabel);
-        card.addView(tvStatus);
-        root.addView(card);
-    }
-
-    private void addDivider(LinearLayout root) {
-        View v = new View(this);
-        LinearLayout.LayoutParams p = new LinearLayout.LayoutParams(-1, 3);
-        p.setMargins(0, 30, 0, 50);
-        v.setLayoutParams(p);
-        v.setBackgroundColor(Color.parseColor("#333333"));
-        root.addView(v);
+        
+        row.addView(tvLabel);
+        row.addView(tvStatus);
+        return row;
     }
 }
