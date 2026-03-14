@@ -25,87 +25,101 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        // Main Container
         LinearLayout mainLayout = new LinearLayout(this);
         mainLayout.setOrientation(LinearLayout.VERTICAL);
         mainLayout.setBackgroundColor(Color.parseColor("#020617"));
         mainLayout.setPadding(40, 40, 40, 40);
 
-        // Header
+        // Header Section
         TextView title = new TextView(this);
-        title.setText("NONGMOL AGENT OS V3.1");
+        title.setText("NONGMOL AGENT OS V3.5");
         title.setTextColor(Color.parseColor("#38BDF8"));
-        title.setTextSize(20);
+        title.setTextSize(22);
         title.setTypeface(Typeface.DEFAULT_BOLD);
         title.setGravity(Gravity.CENTER);
+        title.setPadding(0, 0, 0, 20);
         mainLayout.addView(title);
 
-        // Chat Display Area
+        // System Status Card
+        TextView status = new TextView(this);
+        status.setText("● NEURAL LINK: " + stringFromJNI() + "\n● MODEL: Qwen3.5-0.8B (Ready)");
+        status.setTextColor(Color.parseColor("#10B981"));
+        status.setBackground(createShape("#0F172A", 15));
+        status.setPadding(30, 20, 30, 20);
+        status.setTextSize(12);
+        mainLayout.addView(status);
+
+        // Chat Display (Scrollable)
         scrollView = new ScrollView(this);
         LinearLayout.LayoutParams scrollParams = new LinearLayout.LayoutParams(-1, 0, 1f);
-        scrollParams.setMargins(0, 20, 0, 20);
+        scrollParams.setMargins(0, 30, 0, 30);
         scrollView.setLayoutParams(scrollParams);
 
         chatFeed = new TextView(this);
-        chatFeed.setText("> " + stringFromJNI() + "\n> System Online.");
-        chatFeed.setTextColor(Color.GREEN);
-        chatFeed.setBackground(createShape("#0F172A", 20));
-        chatFeed.setPadding(30, 30, 30, 30);
-        chatFeed.setTextSize(14);
+        chatFeed.setText("> Agent Engine Initialized.\n> System is waiting for your command...");
+        chatFeed.setTextColor(Color.parseColor("#A7F3D0"));
+        chatFeed.setBackground(createShape("#1E293B", 20));
+        chatFeed.setPadding(40, 40, 40, 40);
+        chatFeed.setTextSize(15);
+        chatFeed.setLineSpacing(10, 1);
         
         scrollView.addView(chatFeed);
         mainLayout.addView(scrollView);
 
         // Input Field
         inputField = new EditText(this);
-        inputField.setHint("Type message...");
+        inputField.setHint("Type your command here...");
         inputField.setHintTextColor(Color.GRAY);
         inputField.setTextColor(Color.WHITE);
-        inputField.setBackground(createShape("#1E293B", 15));
-        inputField.setPadding(30, 30, 30, 30);
+        inputField.setBackground(createShape("#334155", 15));
+        inputField.setPadding(30, 35, 30, 35);
         mainLayout.addView(inputField);
 
-        // Action Buttons Row
-        LinearLayout buttonRow = new LinearLayout(this);
-        buttonRow.setOrientation(LinearLayout.HORIZONTAL);
-        buttonRow.setGravity(Gravity.CENTER);
-        buttonRow.setPadding(0, 20, 0, 0);
+        // Control Panel (Buttons)
+        LinearLayout controlPanel = new LinearLayout(this);
+        controlPanel.setOrientation(LinearLayout.HORIZONTAL);
+        controlPanel.setPadding(0, 30, 0, 0);
 
-        // Clear Button
-        Button btnClear = new Button(this);
-        btnClear.setText("CLEAR");
-        btnClear.setBackground(createShape("#334155", 10));
-        btnClear.setTextColor(Color.WHITE);
-        btnClear.setOnClickListener(v -> {
-            chatFeed.setText("> Screen Cleared.\n> Waiting for command...");
+        // Reset Button
+        Button btnReset = new Button(this);
+        btnReset.setText("RESET");
+        btnReset.setBackground(createShape("#64748B", 10));
+        btnReset.setTextColor(Color.WHITE);
+        btnReset.setOnClickListener(v -> {
+            chatFeed.setText("> System Rebooted.\n> All Neural pathways cleared.");
+            Toast.makeText(this, "System Core Reset", Toast.LENGTH_SHORT).show();
         });
-        
+
         // Send Button
         Button btnSend = new Button(this);
-        btnSend.setText("SEND COMMAND");
+        btnSend.setText("EXECUTE");
         btnSend.setBackground(createShape("#0EA5E9", 10));
         btnSend.setTextColor(Color.WHITE);
-        LinearLayout.LayoutParams sendParams = new LinearLayout.LayoutParams(0, -2, 1f);
-        sendParams.setMargins(20, 0, 0, 0);
-        btnSend.setLayoutParams(sendParams);
+        btnSend.setTypeface(Typeface.DEFAULT_BOLD);
+        
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(0, -2, 1f);
+        btnParams.setMargins(20, 0, 0, 0);
+        btnSend.setLayoutParams(btnParams);
         
         btnSend.setOnClickListener(v -> {
-            String msg = inputField.getText().toString();
+            String msg = inputField.getText().toString().trim();
             if(!msg.isEmpty()){
-                chatFeed.append("\n\nYOU: " + msg);
+                chatFeed.append("\n\n[USER]: " + msg);
                 inputField.setText("");
                 
-                // ระบบตอบกลับแบบ Real-time (จำลอง)
+                // Simulate Neural Computation
                 chatFeed.postDelayed(() -> {
-                    String res = "AGENT: [Processing via Qwen...]\n> Result: ภารกิจสำเร็จ ข้อมูลถูกส่งไปยังแกนกลางแล้ว";
-                    chatFeed.append("\n\n" + res);
+                    String response = "[AGENT]: ประมวลผลสำเร็จ\n> ผลลัพธ์: ระบบตอบรับคำสั่ง '" + msg + "' เรียบร้อยแล้ว";
+                    chatFeed.append("\n" + response);
                     scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
-                }, 800);
+                }, 1000);
             }
         });
 
-        buttonRow.addView(btnClear);
-        buttonRow.addView(btnSend);
-        mainLayout.addView(buttonRow);
+        controlPanel.addView(btnReset);
+        controlPanel.addView(btnSend);
+        mainLayout.addView(controlPanel);
 
         setContentView(mainLayout);
     }
