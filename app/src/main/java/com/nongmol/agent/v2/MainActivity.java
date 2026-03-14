@@ -1,38 +1,39 @@
 package com.nongmol.agent.v2;
 
 import android.os.Bundle;
-import android.webkit.JavascriptInterface;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import androidx.appcompat.app.AppCompatActivity;
-import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
-    private WebView webView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        webView = new WebView(this);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setDomStorageEnabled(true); // สำคัญสำหรับ IndexedDB ของพี่
+        WebView myWebView = new WebView(this);
+        WebSettings webSettings = myWebView.getSettings();
         
-        // เชื่อมท่อ Bridge ชื่อ "NongMolBridge" ตามที่พี่ต้องการ
-        webView.addJavascriptInterface(new WebAppInterface(), "NongMolBridge");
-        
-        webView.setWebViewClient(new WebViewClient());
-        webView.loadUrl("file:///android_asset/index.html");
-        setContentView(webView);
+        // เปิดสวิตช์ให้ WebView ทำงานได้เหมือน Browser จริง
+        webSettings.setJavaScriptEnabled(true); 
+        webSettings.setDomStorageEnabled(true); // สำคัญมาก: เพื่อให้ IndexedDB ใน HTML ของพี่ทำงานได้
+        webSettings.setDatabaseEnabled(true);
+        webSettings.setAllowFileAccess(true);
+        webSettings.setAllowContentAccess(true);
+
+        // เชื่อมท่อ Bridge ให้ JavaScript ใน HTML เรียกใช้ได้
+        myWebView.addJavascriptInterface(new NongMolBridge(), "NongMolBridge");
+
+        myWebView.setWebViewClient(new WebViewClient());
+        myWebView.loadUrl("file:///android_asset/index.html");
+        setContentView(myWebView);
     }
 
-    class WebAppInterface {
-        @JavascriptInterface
+    // คลาสสำหรับรับค่าจาก HTML ส่งไป API หรือ JNI
+    public class NongMolBridge {
+        @android.webkit.JavascriptInterface
         public void postToAI(String data) {
-            // นี่คือจุดที่รับข้อมูลจาก HTML มาเลือกว่าจะส่งไป JNI หรือ API เทรน
-            runOnUiThread(() -> {
-                // ส่งค่ากลับไปที่ฟังก์ชันใน HTML ของพี่ (เช่น displayResult)
-                webView.evaluateJavascript("javascript:console.log('Data Received: " + data + "')", null);
-            });
+            // จุดนี้คือท่อส่งข้อมูลที่พี่ต้องการ
+            System.out.println("Data from HTML: " + data);
         }
     }
 }
