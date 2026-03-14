@@ -14,14 +14,13 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         
         ScrollView scroll = new ScrollView(this);
-        LinearLayout root = new LinearLayout(this);
+        final LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(60, 80, 60, 80);
         root.setBackgroundColor(Color.parseColor("#050508")); 
         
-        // Header: NongMol OS
         TextView header = new TextView(this);
-        header.setText("NONGMOL AGENT V15");
+        header.setText("NONGMOL AGENT V15.2");
         header.setTextSize(32);
         header.setTextColor(Color.parseColor("#00FFCC"));
         header.setTypeface(Typeface.create("sans-serif-condensed", Typeface.BOLD));
@@ -29,19 +28,27 @@ public class MainActivity extends Activity {
 
         addDivider(root);
 
-        // แสดงสถานะการเชื่อมต่อเส้นประสาท
+        // แสดงสถานะ (จะอัปเดตเมื่อเปิดแอป)
         addStatusCard(root, "🧠 CORE BRAIN", NongMolCore.INSTANCE.getBRAIN_PATH());
         addStatusCard(root, "👁️ VISION EYE", NongMolCore.INSTANCE.getVISION_PATH());
         addStatusCard(root, "🦾 CLAW MOBILE", NongMolCore.INSTANCE.getENGINE_PATH());
         addStatusCard(root, "👂 WHISPER EAR", NongMolCore.INSTANCE.getEAR_PATH());
 
-        // ปุ่มกระตุ้นระบบประสาท
+        // ปุ่มกระตุ้นระบบประสาท (เพิ่มระบบ Click แล้ว!)
         Button btnBoot = new Button(this);
         btnBoot.setText("CONNECT NEURAL LINK");
-        btnBoot.setBackgroundColor(Color.parseColor("#1A1A2E"));
-        btnBoot.setTextColor(Color.parseColor("#00FFCC"));
+        btnBoot.setBackgroundColor(Color.parseColor("#00FFCC"));
+        btnBoot.setTextColor(Color.BLACK);
         
-        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(-1, -2);
+        btnBoot.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "⚡ ยินดีต้อนรับ! กำลังเชื่อมต่อเส้นประสาท...", Toast.LENGTH_SHORT).show();
+                // ตรงนี้สามารถใส่คำสั่งเริ่มทำงานของโมเดลได้เลยครับ
+            }
+        });
+
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(-1, -120);
         btnParams.setMargins(0, 60, 0, 0);
         root.addView(btnBoot, btnParams);
 
@@ -52,9 +59,8 @@ public class MainActivity extends Activity {
     private void addStatusCard(LinearLayout root, String label, java.io.File file) {
         LinearLayout card = new LinearLayout(this);
         card.setOrientation(LinearLayout.HORIZONTAL);
-        card.setPadding(20, 40, 20, 40);
+        card.setPadding(30, 45, 30, 45);
         
-        // แก้ไข Margin ที่ทำให้ Error รอบที่แล้ว
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
         params.setMargins(0, 15, 0, 15);
         card.setLayoutParams(params);
