@@ -3,35 +3,21 @@ plugins {
 }
 
 android {
-    externalNativeBuild { cmake { path "src/main/cpp/CMakeLists.txt" } }
     namespace 'com.nongmol.agent.v2'
-    compileSdk 34
+    compileSdk 33
 
     defaultConfig {
-        externalNativeBuild { cmake { cppFlags "-std=c++17" } }
         applicationId "com.nongmol.agent.v2"
-        minSdk 26
-        targetSdk 34
-        versionCode 1
-        versionName "3.0"
+        minSdk 24
+        targetSdk 33
+        versionCode 6
+        versionName "6.1"
         externalNativeBuild {
-            cmake { cppFlags "-std=c++17" }
-        }
-    }
-    
-    buildTypes {
-        release {
-            minifyEnabled false
+            cmake { cppFlags "" }
         }
     }
 
     externalNativeBuild {
         cmake { path "src/main/cpp/CMakeLists.txt" }
     }
-}
-
-dependencies {
-    implementation 'com.google.android.material:material:1.11.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 }
