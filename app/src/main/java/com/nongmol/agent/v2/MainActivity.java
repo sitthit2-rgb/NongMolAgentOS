@@ -8,97 +8,74 @@ import android.graphics.Typeface;
 import android.view.Gravity;
 import android.view.View;
 import java.io.*;
-import java.nio.channels.FileChannel;
 
 public class MainActivity extends Activity {
-    private TextView statusLog;
-    private ProgressBar progressBar;
-    // ระบุตำแหน่ง Path ตรงๆ ตามที่พี่แจ้งมา
-    private final String ACTUAL_PATH = "/storage/emulated/0/002/models";
+    private LinearLayout statusContainer;
+    private final String BASE_PATH = "/storage/emulated/0/002";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // UI Layout
+        // --- UI หลัก (Agent Interface) ---
+        ScrollView scroll = new ScrollView(this);
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(Color.parseColor("#0A0A12"));
-        root.setPadding(50, 80, 50, 50);
+        root.setBackgroundColor(Color.parseColor("#050508"));
+        root.setPadding(40, 60, 40, 40);
 
         TextView title = new TextView(this);
-        title.setText("NONGMOL AGENT V16.0");
-        title.setTextSize(26);
-        title.setTypeface(Typeface.DEFAULT_BOLD);
-        title.setTextColor(Color.parseColor("#00FFCC"));
+        title.setText("NONGMOL NEURAL LINK");
+        title.setTextSize(22);
+        title.setTextColor(Color.CYAN);
         title.setGravity(Gravity.CENTER);
         root.addView(title);
 
-        LinearLayout panel = new LinearLayout(this);
-        panel.setOrientation(LinearLayout.VERTICAL);
-        panel.setPadding(40, 40, 40, 40);
-        panel.setBackgroundColor(Color.parseColor("#161625"));
-        
-        statusLog = new TextView(this);
-        statusLog.setText("🛰️ กำลังตรวจสอบไฟล์ที่:\n" + ACTUAL_PATH);
-        statusLog.setTextColor(Color.WHITE);
-        panel.addView(statusLog);
+        // กล่องสถานะการเชื่อมต่อประสาท
+        statusContainer = new LinearLayout(this);
+        statusContainer.setOrientation(LinearLayout.VERTICAL);
+        statusContainer.setPadding(30, 30, 30, 30);
+        statusContainer.setBackgroundColor(Color.parseColor("#10101A"));
+        root.addView(statusContainer);
 
-        progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
-        progressBar.setVisibility(View.GONE);
-        panel.addView(progressBar);
-
-        root.addView(panel);
-
+        // ปุ่มคำสั่งเสียง (ของเดิมที่พี่อยากได้)
         Button btnVoice = new Button(this);
-        btnVoice.setText("🎤 สั่งการด้วยเสียง");
-        btnVoice.setBackgroundColor(Color.parseColor("#00FFCC"));
+        btnVoice.setText("🎤 ACTIVATE VOICE COMMAND");
+        btnVoice.setBackgroundColor(Color.parseColor("#00CCFF"));
         btnVoice.setTextColor(Color.BLACK);
         root.addView(btnVoice);
 
-        setContentView(root);
+        scroll.addView(root);
+        setContentView(scroll);
 
-        // เริ่ม Scan ทันที
-        new Thread(this::scanAndSync).start();
+        // สั่งเชื่อมต่อประสาททั้งหมดทันที
+        checkNeuralNodes();
     }
 
-    private void scanAndSync() {
-        try {
-            File extDir = new File(ACTUAL_PATH);
-            // หาไฟล์ที่มีคำว่า Qwen หรือนามสกุล .gguf
-            File[] files = extDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".gguf"));
-            
-            if (files != null && files.length > 0) {
-                File src = files[0]; // เลือกไฟล์แรกที่เจอ
-                File dst = new File(getFilesDir(), "models/brain.gguf");
-                if (!dst.getParentFile().exists()) dst.getParentFile().mkdirs();
+    private void checkNeuralNodes() {
+        statusContainer.removeAllViews();
+        addNode("🧠 Brain (Qwen Model)", BASE_PATH + "/models/Qwen3.5-0.8B-BF16.gguf");
+        addNode("⚙️ Engine (Llama SO)", BASE_PATH + "/engine/libllama.so");
+        addNode("👂 Ear (Whisper BIN)", BASE_PATH + "/ear/whisper_base.bin");
+        addNode("⚙️ Config System", BASE_PATH + "/config/agent_tasks.json");
+    }
 
-                if (!dst.exists() || dst.length() != src.length()) {
-                    updateUI("📥 พบไฟล์: " + src.getName() + "\nกำลังย้ายเข้าหน่วยความจำแอป...", true);
-                    copyFile(src, dst);
-                    updateUI("✅ ติดตั้ง " + src.getName() + " สำเร็จ!", false);
-                } else {
-                    updateUI("🚀 ระบบพร้อมใช้งาน!\nสมอง: " + src.getName(), false);
-                }
-            } else {
-                updateUI("❌ ไม่พบไฟล์ใน " + ACTUAL_PATH + "\nตรวจสอบว่าไฟล์อยู่ในโฟลเดอร์หรือยัง?", false);
-            }
-        } catch (Exception e) {
-            updateUI("⚠️ ติดสิทธิ์การเข้าถึงไฟล์\nกรุณาเปิดสิทธิ์ 'จัดการไฟล์ทั้งหมด' ในตั้งค่า", false);
+    private void addNode(String name, String path) {
+        File file = new File(path);
+        boolean isOk = file.exists();
+
+        TextView tv = new TextView(this);
+        tv.setText((isOk ? "✅ " : "❌ ") + name);
+        tv.setTextColor(isOk ? Color.GREEN : Color.RED);
+        tv.setPadding(0, 10, 0, 10);
+        statusContainer.addView(tv);
+        
+        if (!isOk) {
+            TextView pathHint = new TextView(this);
+            pathHint.setText("   ㄴ ต้องวางที่: " + path);
+            pathHint.setTextSize(10);
+            pathHint.setTextColor(Color.GRAY);
+            statusContainer.addView(pathHint);
         }
-    }
-
-    private void copyFile(File src, File dst) throws IOException {
-        try (FileChannel in = new FileInputStream(src).getChannel();
-             FileChannel out = new FileOutputStream(dst).getChannel()) {
-            out.transferFrom(in, 0, in.size());
-        }
-    }
-
-    private void updateUI(String msg, boolean showProgress) {
-        runOnUiThread(() -> {
-            statusLog.setText(msg);
-            progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
-        });
     }
 }
