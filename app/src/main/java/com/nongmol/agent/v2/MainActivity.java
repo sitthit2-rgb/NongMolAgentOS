@@ -6,6 +6,8 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 import java.io.File;
@@ -15,7 +17,6 @@ public class MainActivity extends Activity {
     private TextView chatFeed;
     private final String MODEL_PATH = "/storage/emulated/0/002/models/Qwen3.5-0.8B-BF16.gguf";
 
-    // Load Native Engine
     static {
         System.loadLibrary("nongmol-engine");
     }
@@ -30,7 +31,6 @@ public class MainActivity extends Activity {
         mainLayout.setBackgroundColor(Color.parseColor("#020617"));
         mainLayout.setPadding(40, 60, 40, 40);
 
-        // Header
         TextView title = new TextView(this);
         title.setText("NONGMOL AGENT OS");
         title.setTextColor(Color.parseColor("#38BDF8"));
@@ -39,20 +39,19 @@ public class MainActivity extends Activity {
         title.setGravity(Gravity.CENTER);
         mainLayout.addView(title);
 
-        // Status Feed
         chatFeed = new TextView(this);
         chatFeed.setText("> " + stringFromJNI() + "\n> System Ready.");
         chatFeed.setTextColor(Color.GREEN);
         chatFeed.setBackground(createShape("#0F172A", 20));
         chatFeed.setPadding(30, 30, 30, 30);
-        chatFeed.setHeight(800);
         
-        LinearLayout.LayoutParams feedParams = new LinearLayout.LayoutParams(-1, 0, 1f);
-        feedParams.setMargins(0, 40, 0, 40);
-        chatFeed.setLayoutParams(feedParams);
-        mainLayout.addView(chatFeed);
+        ScrollView scrollView = new ScrollView(this);
+        LinearLayout.LayoutParams scrollParams = new LinearLayout.LayoutParams(-1, 0, 1f);
+        scrollParams.setMargins(0, 40, 0, 40);
+        scrollView.setLayoutParams(scrollParams);
+        scrollView.addView(chatFeed);
+        mainLayout.addView(scrollView);
 
-        // Input Area
         LinearLayout inputArea = new LinearLayout(this);
         inputField = new EditText(this);
         inputField.setHint("Ask Qwen anything...");
@@ -72,14 +71,36 @@ public class MainActivity extends Activity {
             String msg = inputField.getText().toString();
             if(!msg.isEmpty()){
                 chatFeed.append("\n\nYOU: " + msg);
-                chatFeed.append("\nAGENT: [Computing via " + new File(MODEL_PATH).getName() + "...]");
                 inputField.setText("");
+                
+                // ระบบตอบกลับจำลอง
+                chatFeed.postDelayed(() -> {
+                    String response = "NongMol Agent: รับทราบครับ ผมกำลังประมวลผล '" + msg + "' ผ่านไฟล์ " + new File(MODEL_PATH).getName();
+                    chatFeed.append("\n\nAGENT: " + response);
+                    scrollView.fullScroll(View.FOCUS_DOWN);
+                }, 1000);
             }
         });
         inputArea.addView(btnSend);
         mainLayout.addView(inputArea);
 
         setContentView(mainLayout);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_clear_chat) {
+            chatFeed.setText("> Chat Cleared.\n> System Ready.");
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private GradientDrawable createShape(String color, int radius) {
