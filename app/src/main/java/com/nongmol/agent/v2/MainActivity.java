@@ -1,6 +1,7 @@
 package com.nongmol.agent.v2;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.*;
 import android.graphics.Color;
@@ -12,53 +13,43 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        File modelDir = new File(getFilesDir(), "models");
-        if (!modelDir.exists()) modelDir.mkdirs();
+        // รับคำสั่งจาก Terminal (Intent)
+        handleIntent(getIntent());
 
         LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(50, 50, 50, 50);
         root.setBackgroundColor(Color.BLACK);
-
         TextView tv = new TextView(this);
-        tv.setText("MODEL IMPORTER V15.6\n");
-        tv.setTextColor(Color.CYAN);
+        tv.setText("SYSTEM READY\nWaiting for CLI Command...");
+        tv.setTextColor(Color.GREEN);
         root.addView(tv);
-
-        // ปุ่มพิเศษสำหรับย้ายไฟล์จาก 002 เข้ามาในแอป
-        Button btnImport = new Button(this);
-        btnImport.setText("🚀 IMPORT FROM /sdcard/002/");
-        btnImport.setOnClickListener(v -> {
-            File source = new File("/sdcard/002/models/Qwen3.5-0.8B-BF16.gguf");
-            File dest = new File(modelDir, "brain.gguf");
-            try {
-                copyFile(source, dest);
-                Toast.makeText(this, "✅ Import Success!", Toast.LENGTH_SHORT).show();
-                recreate();
-            } catch (IOException e) {
-                Toast.makeText(this, "❌ Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-            }
-        });
-        root.addView(btnImport);
-
-        // แสดงสถานะไฟล์
-        checkFile(root, modelDir, "brain.gguf");
-
         setContentView(root);
     }
 
-    private void checkFile(LinearLayout root, File dir, String name) {
-        TextView tv = new TextView(this);
-        File f = new File(dir, name);
-        tv.setText(name + ": " + (f.exists() ? "READY ✅" : "MISSING ❌"));
-        tv.setTextColor(f.exists() ? Color.GREEN : Color.RED);
-        root.addView(tv);
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleIntent(intent);
     }
 
-    private void copyFile(File source, File dest) throws IOException {
+    private void handleIntent(Intent intent) {
+        if (intent != null && "COPY_MODEL".equals(intent.getAction())) {
+            copyModelTask();
+        }
+    }
+
+    private void copyModelTask() {
+        File source = new File("/sdcard/002/models/Qwen3.5-0.8B-BF16.gguf");
+        File destDir = new File(getFilesDir(), "models");
+        if (!destDir.exists()) destDir.mkdirs();
+        File dest = new File(destDir, "brain.gguf");
+
         try (FileChannel src = new FileInputStream(source).getChannel();
              FileChannel dst = new FileOutputStream(dest).getChannel()) {
             dst.transferFrom(src, 0, src.size());
+            android.util.Log.d("NONGMOL", "Copy Success!");
+        } catch (Exception e) {
+            android.util.Log.e("NONGMOL", "Copy Failed: " + e.getMessage());
         }
     }
 }
