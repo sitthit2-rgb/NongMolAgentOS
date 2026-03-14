@@ -7,11 +7,16 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import androidx.appcompat.app.AppCompatActivity;
+
+import okhttp3.*;
+import org.json.JSONObject;
+import java.io.IOException;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private WebView myWebView;
     private TextToSpeech tts;
+    private final OkHttpClient client = new OkHttpClient();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,11 +26,8 @@ public class MainActivity extends AppCompatActivity {
         ws.setJavaScriptEnabled(true);
         ws.setDomStorageEnabled(true);
         
-        // ตั้งค่า TTS (เสียงพูด)
         tts = new TextToSpeech(this, status -> {
-            if (status != TextToSpeech.ERROR) {
-                tts.setLanguage(new Locale("th", "TH"));
-            }
+            if (status != TextToSpeech.ERROR) tts.setLanguage(new Locale("th", "TH"));
         });
 
         myWebView.addJavascriptInterface(new NongMolBridge(), "NongMolBridge");
@@ -36,26 +38,59 @@ public class MainActivity extends AppCompatActivity {
 
     public class NongMolBridge {
         @JavascriptInterface
-        public void postToAI(final String message) {
-            runOnUiThread(() -> {
-                // ระบบโต้ตอบ (Logic จำลอง - พี่สามารถเปลี่ยนเป็นเรียก JNI ตรงนี้ได้)
-                String response = "น้องมลได้ยินพี่พูดว่า " + message + " ค่ะ";
-                
-                // 1. ส่งข้อความกลับไปโชว์ที่หน้าจอ HTML
-                myWebView.evaluateJavascript("updateBotResponse('" + response + "')", null);
-                
-                // 2. สั่งให้น้องมลออกเสียงพูด
-                tts.speak(response, TextToSpeech.QUEUE_FLUSH, null, null);
-            });
+        public void postToAI(String userText) {
+            // เรียกฟังก์ชันยิง API
+            callAI_API(userText);
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        if (tts != null) {
-            tts.stop();
-            tts.shutdown();
-        }
-        super.onDestroy();
+    private void callAI_API(String text) {
+        // --- ส่วนที่พี่ต้องแก้: URL และ API Key ---
+        String apiUrl = "https://api.openai.com/v1/chat/completions"; 
+        String apiKey = "YOUR_API_KEY_HERE"; 
+
+        try {
+            JSONObject json = new JSONObject();
+            json.put("model", "gpt-3.5-turbo"); // หรือโมเดลที่พี่ใช้
+            json.append("messages", new JSONObject().put("role", "user").put("content", text));
+
+            RequestBody body = RequestBody.create(
+                json.toString(), MediaType.get("application/json; charset=utf-8"));
+
+            Request request = new Request.Builder()
+                .url(apiUrl)
+                .header("Authorization", "Bearer " + apiKey)
+                .post(body)
+                .build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    updateUIAndSpeak("ขออภัยค่ะพี่ เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        try {
+                            String resBody = response.body().string();
+                            JSONObject resJson = new JSONObject(resBody);
+                            String answer = resJson.getJSONArray("choices")
+                                .getJSONObject(0).getJSONObject("message").getString("content");
+                            updateUIAndSpeak(answer);
+                        } catch (Exception e) {
+                            updateUIAndSpeak("อ่านคำตอบไม่ได้ค่ะ");
+                        }
+                    }
+                }
+            });
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    private void updateUIAndSpeak(final String msg) {
+        runOnUiThread(() -> {
+            myWebView.evaluateJavascript("updateBotResponse('" + msg.replace("'", "\\'") + "')", null);
+            tts.speak(msg, TextToSpeech.QUEUE_FLUSH, null, null);
+        });
     }
 }
