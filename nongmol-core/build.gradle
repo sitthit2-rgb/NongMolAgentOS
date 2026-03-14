@@ -1,0 +1,21 @@
+plugins {
+    id 'com.android.library'
+    id 'kotlin-android'
+}
+
+android {
+    namespace 'com.nongmol.core'
+    compileSdk 34
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+}
+
+dependencies {
+    // เติมหัวใจสำหรับการต่อเน็ต
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+}

@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.NongMolOS" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#00E5FF</item>
+        <item name="android:statusBarColor">#05080A</item>
+    </style>
+</resources>

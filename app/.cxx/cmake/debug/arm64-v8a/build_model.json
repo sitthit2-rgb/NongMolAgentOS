@@ -1,0 +1,210 @@
+{
+  "abi": "ARM64_V8A",
+  "abiPlatformVersion": 21,
+  "buildSettings": {
+    "environmentVariables": []
+  },
+  "cmake": {
+    "cmakeArtifactsBaseFolder": "/data/data/com.termux/files/home/NongMolAgentOS/app/.cxx/cmake/debug/arm64-v8a",
+    "cmakeServerLogFile": "/data/data/com.termux/files/home/NongMolAgentOS/app/.cxx/cmake/debug/arm64-v8a/cmake_server_log.txt",
+    "cmakeWrappingBaseFolder": "/data/data/com.termux/files/home/NongMolAgentOS/app/.cxx/cxx/debug/arm64-v8a",
+    "effectiveConfiguration": {
+      "name": "traditional-android-studio-cmake-environment",
+      "description": "Composite reified CMakeSettings configuration",
+      "generator": "Ninja",
+      "inheritEnvironments": [
+        "ndk"
+      ],
+      "buildRoot": "/data/data/com.termux/files/home/NongMolAgentOS/app/.cxx/cmake/debug/arm64-v8a",
+      "cmakeToolchain": "/data/data/com.termux/files/home/android-sdk/ndk/25.1.8937393/build/cmake/android.toolchain.cmake",
+      "cmakeExecutable": "/data/data/com.termux/files/home/android-sdk/cmake/3.22.1/bin/cmake",
+      "variables": [
+        {
+          "name": "CMAKE_CXX_FLAGS",
+          "value": "-std\u003dc++11"
+        },
+        {
+          "name": "CMAKE_FIND_ROOT_PATH",
+          "value": "/data/data/com.termux/files/home/NongMolAgentOS/app/.cxx/cmake/debug/prefab/arm64-v8a/prefab"
+        },
+        {
+          "name": "CMAKE_BUILD_TYPE",
+          "value": "Debug"
+        },
+        {
+          "name": "CMAKE_TOOLCHAIN_FILE",
+          "value": "/data/data/com.termux/files/home/android-sdk/ndk/25.1.8937393/build/cmake/android.toolchain.cmake"
+        },
+        {
+          "name": "ANDROID_ABI",
+          "value": "arm64-v8a"
+        },
+        {
+          "name": "ANDROID_NDK",
+          "value": "/data/data/com.termux/files/home/android-sdk/ndk/25.1.8937393"
+        },
+        {
+          "name": "ANDROID_PLATFORM",
+          "value": "android-21"
+        },
+        {
+          "name": "CMAKE_ANDROID_ARCH_ABI",
+          "value": "arm64-v8a"
+        },
+        {
+          "name": "CMAKE_ANDROID_NDK",
+          "value": "/data/data/com.termux/files/home/android-sdk/ndk/25.1.8937393"
+        },
+        {
+          "name": "CMAKE_EXPORT_COMPILE_COMMANDS",
+          "value": "ON"
+        },
+        {
+          "name": "CMAKE_LIBRARY_OUTPUT_DIRECTORY",
+          "value": "/data/data/com.termux/files/home/NongMolAgentOS/app/build/intermediates/cmake/debug/obj/arm64-v8a"
+        },
+        {
+          "name": "CMAKE_MAKE_PROGRAM",
+          "value": "/data/data/com.termux/files/home/android-sdk/cmake/3.22.1/bin/ninja"
+        },
+        {
+          "name": "CMAKE_SYSTEM_NAME",
+          "value": "Android"
+        },
+        {
+          "name": "CMAKE_SYSTEM_VERSION",
+          "value": "21"
+        }
+      ]
+    }
+  },
+  "cxxBuildFolder": "/data/data/com.termux/files/home/NongMolAgentOS/app/.cxx/cmake/debug/arm64-v8a",
+  "info": {
+    "abi": "ARM64_V8A",
+    "bitness": 64,
+    "deprecated": false,
+    "default": true
+  },
+  "originalCxxBuildFolder": "/data/data/com.termux/files/home/NongMolAgentOS/app/.cxx/cmake/debug/arm64-v8a",
+  "variant": {
+    "buildSystemArgumentList": [],
+    "buildTargetSet": [],
+    "cFlagsList": [],
+    "cmakeSettingsConfiguration": "android-gradle-plugin-predetermined-name",
+    "cppFlagsList": [
+      "-std\u003dc++11"
+    ],
+    "isDebuggableEnabled": true,
+    "module": {
+      "buildSystem": "CMAKE",
+      "cmake": {
+        "cmakeExe": "/data/data/com.termux/files/home/android-sdk/cmake/3.22.1/bin/cmake",
+        "minimumCmakeVersion": "3.22.1",
+        "ninjaExe": "/data/data/com.termux/files/home/android-sdk/cmake/3.22.1/bin/ninja"
+      },
+      "cmakeToolchainFile": "/data/data/com.termux/files/home/android-sdk/ndk/25.1.8937393/build/cmake/android.toolchain.cmake",
+      "cxxFolder": "/data/data/com.termux/files/home/NongMolAgentOS/app/.cxx",
+      "gradleModulePathName": ":app",
+      "intermediatesFolder": "/data/data/com.termux/files/home/NongMolAgentOS/app/build/intermediates",
+      "makeFile": "/data/data/com.termux/files/home/NongMolAgentOS/app/src/main/cpp/CMakeLists.txt",
+      "moduleBuildFile": "/data/data/com.termux/files/home/NongMolAgentOS/app/build.gradle",
+      "moduleRootFolder": "/data/data/com.termux/files/home/NongMolAgentOS/app",
+      "ndkDefaultAbiList": [
+        "ARMEABI_V7A",
+        "ARM64_V8A",
+        "X86",
+        "X86_64"
+      ],
+      "ndkFolder": "/data/data/com.termux/files/home/android-sdk/ndk/25.1.8937393",
+      "ndkMetaAbiList": [
+        {
+          "abi": "ARMEABI_V7A",
+          "bitness": 32,
+          "deprecated": false,
+          "default": true
+        },
+        {
+          "abi": "ARM64_V8A",
+          "bitness": 64,
+          "deprecated": false,
+          "default": true
+        },
+        {
+          "abi": "X86",
+          "bitness": 32,
+          "deprecated": false,
+          "default": true
+        },
+        {
+          "abi": "X86_64",
+          "bitness": 64,
+          "deprecated": false,
+          "default": true
+        }
+      ],
+      "ndkMetaPlatforms": {
+        "min": 19,
+        "max": 33,
+        "aliases": {
+          "20": 19,
+          "25": 24,
+          "J": 16,
+          "J-MR1": 17,
+          "J-MR2": 18,
+          "K": 19,
+          "L": 21,
+          "L-MR1": 22,
+          "M": 23,
+          "N": 24,
+          "N-MR1": 24,
+          "O": 26,
+          "O-MR1": 27,
+          "P": 28,
+          "Q": 29,
+          "R": 30,
+          "S": 31,
+          "Sv2": 32,
+          "Tiramisu": 33
+        }
+      },
+      "ndkSupportedAbiList": [
+        "ARMEABI_V7A",
+        "ARM64_V8A",
+        "X86",
+        "X86_64"
+      ],
+      "ndkDefaultStl": "LIBCXX_STATIC",
+      "ndkVersion": "25.1.8937393",
+      "project": {
+        "compilerSettingsCacheFolder": "/data/data/com.termux/files/home/NongMolAgentOS/.cxx",
+        "cxxFolder": "/data/data/com.termux/files/home/NongMolAgentOS/.cxx",
+        "isBuildOnlyTargetAbiEnabled": true,
+        "isCmakeBuildCohabitationEnabled": false,
+        "isNativeCompilerSettingsCacheEnabled": false,
+        "rootBuildGradleFolder": "/data/data/com.termux/files/home/NongMolAgentOS",
+        "sdkFolder": "/data/data/com.termux/files/home/android-sdk",
+        "isPrefabEnabled": false
+      },
+      "splitsAbiFilterSet": [],
+      "stlSharedObjectMap": {
+        "LIBCXX_SHARED": {
+          "ARMEABI_V7A": "/data/data/com.termux/files/home/android-sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/arm-linux-androideabi/libc++_shared.so",
+          "ARM64_V8A": "/data/data/com.termux/files/home/android-sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so",
+          "X86": "/data/data/com.termux/files/home/android-sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/i686-linux-android/libc++_shared.so",
+          "X86_64": "/data/data/com.termux/files/home/android-sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/x86_64-linux-android/libc++_shared.so"
+        },
+        "LIBCXX_STATIC": {},
+        "NONE": {},
+        "SYSTEM": {}
+      }
+    },
+    "objFolder": "/data/data/com.termux/files/home/NongMolAgentOS/app/build/intermediates/cmake/debug/obj",
+    "variantName": "debug",
+    "validAbiList": [
+      "ARM64_V8A"
+    ],
+    "prefabDirectory": "/data/data/com.termux/files/home/NongMolAgentOS/app/.cxx/cmake/debug/prefab",
+    "prefabPackageDirectoryList": []
+  },
+  "prefabFolder": "/data/data/com.termux/files/home/NongMolAgentOS/app/.cxx/cmake/debug/prefab/arm64-v8a"
+}
