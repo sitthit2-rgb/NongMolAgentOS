@@ -1,79 +1,78 @@
 package com.nongmol.agent.v2;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.Settings;
-import android.speech.tts.TextToSpeech;
 import android.view.Gravity;
 import android.widget.*;
 import java.io.File;
-import java.util.Locale;
 
 public class MainActivity extends Activity {
-    // ล็อกเป้าหมายไปที่ไฟล์ของพี่โดยตรง ไม่ต้องเปลี่ยนชื่อไฟล์แล้ว
-    private final String BRAIN_PATH = "/storage/emulated/0/002/models/Qwen3.5-0.8B-BF16.gguf";
-    private TextToSpeech tts;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
-        // เตรียมระบบ "ปาก" (TTS)
-        tts = new TextToSpeech(this, status -> {
-            if (status == TextToSpeech.SUCCESS) tts.setLanguage(new Locale("th", "TH"));
-        });
+        // พื้นหลังโทนเข้มแบบ Sci-Fi
+        ScrollView scroll = new ScrollView(this);
+        scroll.setBackgroundColor(Color.parseColor("#0F172A"));
 
-        setupIntegratedUI();
-    }
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(60, 80, 60, 80);
+        layout.setGravity(Gravity.CENTER_HORIZONTAL);
 
-    private void setupIntegratedUI() {
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(Color.parseColor("#050505"));
-        root.setPadding(50, 80, 50, 50);
-        root.setGravity(Gravity.CENTER_HORIZONTAL);
+        // Header
+        TextView header = new TextView(this);
+        header.setText("NONGMOL AGENT OS");
+        header.setTextColor(Color.parseColor("#38BDF8"));
+        header.setTextSize(26);
+        header.setTypeface(null, Typeface.BOLD);
+        layout.addView(header);
 
-        TextView title = new TextView(this);
-        title.setText("NONGMOL ALL-IN-ONE SYSTEM");
-        title.setTextColor(Color.CYAN);
-        title.setTextSize(22);
-        root.addView(title);
-
-        // เช็คการเชื่อมต่อไฟล์จริง
-        File brainFile = new File(BRAIN_PATH);
-        TextView status = new TextView(this);
-        status.setPadding(0, 40, 0, 40);
+        // Model Status Card
+        addCard(layout, "NEURAL BRAIN", "/storage/emulated/0/002/models/Qwen3.5-0.8B-BF16.gguf");
         
-        if (brainFile.exists()) {
-            status.setText("✅ BRAIN CONNECTED\n(Qwen3.5-0.8B Detected)");
-            status.setTextColor(Color.GREEN);
-            tts.speak("ระบบเชื่อมต่อสมองสำเร็จแล้วค่ะ", TextToSpeech.QUEUE_FLUSH, null, null);
-        } else {
-            status.setText("❌ BRAIN DISCONNECTED\nSearching for: " + BRAIN_PATH);
-            status.setTextColor(Color.RED);
-        }
-        root.addView(status);
+        // Voice Status Card
+        addCard(layout, "EAR/VOICE ENGINE", "/storage/emulated/0/002/ear/whisper_base.bin");
 
-        // ปุ่มเปิดระบบทั้งหมด
-        Button btn = new Button(this);
-        btn.setText("ACTIVATE ALL SYSTEMS");
-        btn.setBackgroundColor(Color.DKGRAY);
-        btn.setTextColor(Color.WHITE);
-        btn.setOnClickListener(v -> {
-            startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
-            Toast.makeText(this, "กรุณาเปิดการอนุญาต NongMol ในหน้าตั้งค่า", Toast.LENGTH_LONG).show();
-        });
-        root.addView(btn);
+        // ปุ่ม Chat (ทางลัด)
+        Button btnChat = new Button(this);
+        btnChat.setText("OPEN NEURAL CHAT");
+        btnChat.setBackgroundColor(Color.parseColor("#1E293B"));
+        btnChat.setTextColor(Color.WHITE);
+        layout.addView(btnChat);
 
-        setContentView(root);
+        scroll.addView(layout);
+        setContentView(scroll);
     }
 
-    @Override
-    protected void onDestroy() {
-        if (tts != null) tts.shutdown();
-        super.onDestroy();
+    private void addCard(LinearLayout parent, String title, String path) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setPadding(40, 40, 40, 40);
+        card.setBackgroundColor(Color.parseColor("#1E293B"));
+        
+        TextView t = new TextView(this);
+        t.setText(title);
+        t.setTextColor(Color.GRAY);
+        card.addView(t);
+
+        TextView s = new TextView(this);
+        File f = new File(path);
+        if(f.exists()) {
+            s.setText("● ONLINE");
+            s.setTextColor(Color.GREEN);
+        } else {
+            s.setText("○ OFFLINE (Missing File)");
+            s.setTextColor(Color.RED);
+        }
+        card.addView(s);
+        
+        parent.addView(card);
+        // ใส่ Space ระหว่าง Card
+        View space = new View(this);
+        space.setMinimumHeight(30);
+        parent.addView(space);
     }
 }
