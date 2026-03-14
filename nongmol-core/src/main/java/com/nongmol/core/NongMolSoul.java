@@ -1,10 +1,11 @@
 package com.nongmol.core;
 
 public class NongMolSoul {
-    public static String processResponse(String rawAiResponse) {
-        if (rawAiResponse.contains("[ACTION]")) {
-            return rawAiResponse.trim();
-        }
-        return "TALK: " + rawAiResponse;
+    // ระบบวิเคราะห์คำสั่ง (Action Parser) แบบ mobile-use
+    public static String interpret(String aiResponse) {
+        if (aiResponse.contains("[CLICK]")) return "ACTION_CLICK";
+        if (aiResponse.contains("[TYPE]")) return "ACTION_TYPE";
+        if (aiResponse.contains("[OPEN]")) return "ACTION_OPEN";
+        return "ACTION_TALK";
     }
 }
