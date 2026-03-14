@@ -4,43 +4,21 @@ import android.content.Context
 import android.os.Environment
 import android.util.Log
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 
 object NongMolCore {
-    private const val TAG = "NongMolCore"
+    // กำหนด Root Path ให้ชัดเจน
+    val ROOT_PATH = File(Environment.getExternalStorageDirectory(), "002")
     
-    // Phase 1: โหลด Engine (Auto-Loader)
-    fun initEngine(context: Context): Boolean {
-        val externalSo = File(Environment.getExternalStorageDirectory(), "/002/engine/libllama.so")
-        if (!externalSo.exists()) {
-            Log.e(TAG, "libllama.so not found in /002/engine/")
-            return false
-        }
+    // เส้นประสาทแต่ละส่วน
+    val ENGINE_PATH = File(ROOT_PATH, "engine/libllama.so")
+    val BRAIN_PATH = File(ROOT_PATH, "models/brain_llama3.gguf")
+    val VISION_PATH = File(ROOT_PATH, "models/vision_llama3.gguf")
+    val EAR_PATH = File(ROOT_PATH, "ear/whisper_base.bin")
 
-        try {
-            // Android บังคับให้โหลด .so จากพื้นที่ส่วนตัวของแอปเท่านั้น จึงต้องก๊อปปี้เข้ามา
-            val internalDir = context.getDir("engine_libs", Context.MODE_PRIVATE)
-            val internalSo = File(internalDir, "libllama.so")
-            
-            FileInputStream(externalSo).use { fis ->
-                FileOutputStream(internalSo).use { fos ->
-                    fis.copyTo(fos)
-                }
-            }
-            
-            System.load(internalSo.absolutePath)
-            Log.i(TAG, "Engine loaded successfully!")
-            return true
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to load Engine: ${e.message}")
-            return false
-        }
-    }
+    fun checkStatus(file: File): Boolean = file.exists()
 
-    // Phase 2 & 3: เช็คว่าไฟล์สมองพร้อมไหม
-    fun isBrainReady(): Boolean {
-        val brain = File(Environment.getExternalStorageDirectory(), "/002/models/brain_llama3.gguf")
-        return brain.exists()
+    // ระบบ API ครู (Neural Bridge - ตัวแปลคำสั่ง)
+    fun processInstruction(task: String): String {
+        return "🧠 NongMol Thinking: Analyzing $task using ClawMobile logic..."
     }
 }

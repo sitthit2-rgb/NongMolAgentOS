@@ -1,92 +1,81 @@
 package com.nongmol.agent.v2;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.Settings;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Button;
+import android.view.View;
+import android.widget.*;
 import android.graphics.Color;
-import java.io.File;
+import android.graphics.Typeface;
 import com.nongmol.core.NongMolCore;
 
 public class MainActivity extends Activity {
-    private LinearLayout layout;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(50, 50, 50, 50);
-        layout.setBackgroundColor(Color.parseColor("#121212"));
-        setContentView(layout);
-
-        checkPermissions();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (Environment.isExternalStorageManager()) {
-            drawUI();
-        }
-    }
-
-    private void checkPermissions() {
-        if (!Environment.isExternalStorageManager()) {
-            Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
-            intent.setData(Uri.parse("package:" + getPackageName()));
-            startActivity(intent);
-        }
-    }
-
-    private void drawUI() {
-        layout.removeAllViews();
         
-        TextView title = new TextView(this);
-        title.setText("NongMol OS - Diagnostics");
-        title.setTextColor(Color.WHITE);
-        title.setTextSize(24);
-        title.setPadding(0, 0, 0, 30);
-        layout.addView(title);
+        // สร้าง UI แบบ Dynamic ที่สวยงามขึ้น
+        ScrollView scroll = new ScrollView(this);
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(60, 80, 60, 80);
+        root.setBackgroundColor(Color.parseColor("#0A0A0F")); // Deep Space Blue
+        
+        // Header
+        TextView header = new TextView(this);
+        header.setText("NONGMOL AGENT OS");
+        header.setTextSize(28);
+        header.setTextColor(Color.parseColor("#00FFCC")); // Cyber Neon
+        header.setTypeface(null, Typeface.BOLD);
+        root.addView(header);
 
-        boolean allGreen = true;
-        allGreen &= checkFile("/002/engine/libllama.so", "1. Engine (.so)");
-        allGreen &= checkFile("/002/models/brain_llama3.gguf", "2. Brain (.gguf)");
-        allGreen &= checkFile("/002/models/vision_llama3.gguf", "3. Vision (.gguf)");
-        allGreen &= checkFile("/002/ear/whisper_base.bin", "4. Ear (.bin)");
+        addDivider(root);
 
-        if (allGreen) {
-            Button btnStart = new Button(this);
-            btnStart.setText("BOOT AGENT CORE");
-            btnStart.setOnClickListener(v -> bootSystem());
-            layout.addView(btnStart);
-        }
+        // ระบบตรวจสอบสถานะ (Diagnostics)
+        addStatusCard(root, "ENGINE UNIT", NongMolCore.INSTANCE.getENGINE_PATH());
+        addStatusCard(root, "NEURAL BRAIN", NongMolCore.INSTANCE.getBRAIN_PATH());
+        addStatusCard(root, "VISION SENSOR", NongMolCore.INSTANCE.getVISION_PATH());
+        addStatusCard(root, "AUDITORY EAR", NongMolCore.INSTANCE.getEAR_PATH());
+
+        // ปุ่มควบคุม
+        Button btnBoot = new Button(this);
+        btnBoot.setText("INITIALIZE NEURAL LINK");
+        btnBoot.setBackgroundColor(Color.parseColor("#1A1A2E"));
+        btnBoot.setTextColor(Color.WHITE);
+        btnBoot.setPadding(20, 40, 20, 40);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(-1, -2);
+        lp.setMargins(0, 50, 0, 0);
+        root.addView(btnBoot, lp);
+
+        scroll.addView(root);
+        setContentView(scroll);
     }
 
-    private boolean checkFile(String path, String label) {
-        File file = new File(Environment.getExternalStorageDirectory(), path);
-        TextView tv = new TextView(this);
+    private void addStatusCard(LinearLayout root, String label, java.io.File file) {
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.HORIZONTAL);
+        card.setPadding(30, 30, 30, 30);
+        card.setMargins(0, 10, 0, 10);
+        
+        TextView tvLabel = new TextView(this);
+        tvLabel.setText(label);
+        tvLabel.setTextColor(Color.GRAY);
+        tvLabel.setLayoutParams(new LinearLayout.LayoutParams(0, -2, 1f));
+
+        TextView tvStatus = new TextView(this);
         boolean exists = file.exists();
-        tv.setText((exists ? "✅ " : "❌ ") + label);
-        tv.setTextColor(exists ? Color.GREEN : Color.RED);
-        tv.setTextSize(18);
-        tv.setPadding(0, 10, 0, 10);
-        layout.addView(tv);
-        return exists;
+        tvStatus.setText(exists ? "ONLINE" : "OFFLINE");
+        tvStatus.setTextColor(exists ? Color.GREEN : Color.RED);
+        tvStatus.setTypeface(null, Typeface.BOLD);
+
+        card.addView(tvLabel);
+        card.addView(tvStatus);
+        root.addView(card);
     }
 
-    private void bootSystem() {
-        // Phase 1 & 2: เรียก Core ให้โหลด Engine และ Brain
-        boolean isEngineUp = NongMolCore.INSTANCE.initEngine(this);
-        if (isEngineUp && NongMolCore.INSTANCE.isBrainReady()) {
-            // Phase 3: เปิดหน้าตั้งค่าให้ผู้ใช้เปิดสวิตช์ HandService (Accessibility)
-            Intent intent = new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS);
-            startActivity(intent);
-        }
+    private void addDivider(LinearLayout root) {
+        View v = new View(this);
+        v.setLayoutParams(new LinearLayout.LayoutParams(-1, 2));
+        v.setBackgroundColor(Color.DKGRAY);
+        root.addView(v);
     }
 }
