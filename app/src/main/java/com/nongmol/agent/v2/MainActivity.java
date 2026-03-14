@@ -6,8 +6,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.view.Gravity;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.*;
 import java.io.File;
@@ -15,6 +13,7 @@ import java.io.File;
 public class MainActivity extends Activity {
     private EditText inputField;
     private TextView chatFeed;
+    private ScrollView scrollView;
     private final String MODEL_PATH = "/storage/emulated/0/002/models/Qwen3.5-0.8B-BF16.gguf";
 
     static {
@@ -29,78 +28,86 @@ public class MainActivity extends Activity {
         LinearLayout mainLayout = new LinearLayout(this);
         mainLayout.setOrientation(LinearLayout.VERTICAL);
         mainLayout.setBackgroundColor(Color.parseColor("#020617"));
-        mainLayout.setPadding(40, 60, 40, 40);
+        mainLayout.setPadding(40, 40, 40, 40);
 
+        // Header
         TextView title = new TextView(this);
-        title.setText("NONGMOL AGENT OS");
+        title.setText("NONGMOL AGENT OS V3.1");
         title.setTextColor(Color.parseColor("#38BDF8"));
-        title.setTextSize(22);
+        title.setTextSize(20);
         title.setTypeface(Typeface.DEFAULT_BOLD);
         title.setGravity(Gravity.CENTER);
         mainLayout.addView(title);
 
+        // Chat Display Area
+        scrollView = new ScrollView(this);
+        LinearLayout.LayoutParams scrollParams = new LinearLayout.LayoutParams(-1, 0, 1f);
+        scrollParams.setMargins(0, 20, 0, 20);
+        scrollView.setLayoutParams(scrollParams);
+
         chatFeed = new TextView(this);
-        chatFeed.setText("> " + stringFromJNI() + "\n> System Ready.");
+        chatFeed.setText("> " + stringFromJNI() + "\n> System Online.");
         chatFeed.setTextColor(Color.GREEN);
         chatFeed.setBackground(createShape("#0F172A", 20));
         chatFeed.setPadding(30, 30, 30, 30);
+        chatFeed.setTextSize(14);
         
-        ScrollView scrollView = new ScrollView(this);
-        LinearLayout.LayoutParams scrollParams = new LinearLayout.LayoutParams(-1, 0, 1f);
-        scrollParams.setMargins(0, 40, 0, 40);
-        scrollView.setLayoutParams(scrollParams);
         scrollView.addView(chatFeed);
         mainLayout.addView(scrollView);
 
-        LinearLayout inputArea = new LinearLayout(this);
+        // Input Field
         inputField = new EditText(this);
-        inputField.setHint("Ask Qwen anything...");
+        inputField.setHint("Type message...");
         inputField.setHintTextColor(Color.GRAY);
         inputField.setTextColor(Color.WHITE);
         inputField.setBackground(createShape("#1E293B", 15));
-        
-        LinearLayout.LayoutParams inputParams = new LinearLayout.LayoutParams(0, -2, 1f);
-        inputField.setLayoutParams(inputParams);
-        inputArea.addView(inputField);
+        inputField.setPadding(30, 30, 30, 30);
+        mainLayout.addView(inputField);
 
+        // Action Buttons Row
+        LinearLayout buttonRow = new LinearLayout(this);
+        buttonRow.setOrientation(LinearLayout.HORIZONTAL);
+        buttonRow.setGravity(Gravity.CENTER);
+        buttonRow.setPadding(0, 20, 0, 0);
+
+        // Clear Button
+        Button btnClear = new Button(this);
+        btnClear.setText("CLEAR");
+        btnClear.setBackground(createShape("#334155", 10));
+        btnClear.setTextColor(Color.WHITE);
+        btnClear.setOnClickListener(v -> {
+            chatFeed.setText("> Screen Cleared.\n> Waiting for command...");
+        });
+        
+        // Send Button
         Button btnSend = new Button(this);
-        btnSend.setText("SEND");
-        btnSend.setTextColor(Color.WHITE);
+        btnSend.setText("SEND COMMAND");
         btnSend.setBackground(createShape("#0EA5E9", 10));
+        btnSend.setTextColor(Color.WHITE);
+        LinearLayout.LayoutParams sendParams = new LinearLayout.LayoutParams(0, -2, 1f);
+        sendParams.setMargins(20, 0, 0, 0);
+        btnSend.setLayoutParams(sendParams);
+        
         btnSend.setOnClickListener(v -> {
             String msg = inputField.getText().toString();
             if(!msg.isEmpty()){
                 chatFeed.append("\n\nYOU: " + msg);
                 inputField.setText("");
                 
-                // ระบบตอบกลับจำลอง
+                // ระบบตอบกลับแบบ Real-time (จำลอง)
                 chatFeed.postDelayed(() -> {
-                    String response = "NongMol Agent: รับทราบครับ ผมกำลังประมวลผล '" + msg + "' ผ่านไฟล์ " + new File(MODEL_PATH).getName();
-                    chatFeed.append("\n\nAGENT: " + response);
-                    scrollView.fullScroll(View.FOCUS_DOWN);
-                }, 1000);
+                    String res = "AGENT: [Processing via Qwen...]\n> Result: ภารกิจสำเร็จ ข้อมูลถูกส่งไปยังแกนกลางแล้ว";
+                    chatFeed.append("\n\n" + res);
+                    scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
+                }, 800);
             }
         });
-        inputArea.addView(btnSend);
-        mainLayout.addView(inputArea);
+
+        buttonRow.addView(btnClear);
+        buttonRow.addView(btnSend);
+        mainLayout.addView(buttonRow);
 
         setContentView(mainLayout);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == R.id.action_clear_chat) {
-            chatFeed.setText("> Chat Cleared.\n> System Ready.");
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
     private GradientDrawable createShape(String color, int radius) {
