@@ -3,15 +3,14 @@ package com.nongmol.agent.v2;
 import android.accessibilityservice.AccessibilityService;
 import android.graphics.PixelFormat;
 import android.view.Gravity;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.Button;
 import android.widget.Toast;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
-import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.media.MediaRecorder;
 import android.speech.tts.TextToSpeech;
 import java.util.Locale;
 
@@ -19,50 +18,36 @@ public class AgentAccessibilityService extends AccessibilityService {
     private WindowManager windowManager;
     private View floatingView;
     private Button agentButton;
-    
-    // ระบบเสียง
-    private boolean isRecording = false;
-    private AudioRecord audioRecord;
     private TextToSpeech tts;
+    private boolean isActive = false;
 
     @Override
     protected void onServiceConnected() {
         super.onServiceConnected();
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         
-        // เตรียมระบบพูดตอบกลับ (TTS)
+        // Setup World-Class TTS
         tts = new TextToSpeech(this, status -> {
-            if (status == TextToSpeech.SUCCESS) {
-                tts.setLanguage(new Locale("th", "TH")); // ตั้งเสียงภาษาไทย
-            }
+            if (status == TextToSpeech.SUCCESS) tts.setLanguage(new Locale("th", "TH"));
         });
 
+        // Floating Action Button (Neural Link Style)
         agentButton = new Button(this);
-        agentButton.setText("🤖 NONGMOL (กดเพื่อพูด)");
-        agentButton.setTextColor(Color.WHITE);
+        updateButtonState(false);
         
-        GradientDrawable bg = new GradientDrawable();
-        bg.setColor(Color.parseColor("#99000000")); // ดำโปร่งแสง
-        bg.setCornerRadius(50f);
-        bg.setStroke(3, Color.CYAN);
-        agentButton.setBackground(bg);
-
         WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
-        params.gravity = Gravity.TOP | Gravity.START;
-        params.x = 0;
-        params.y = 300;
-
-        // ระบบกดเพื่อสลับการฟังเสียง (Toggle Recording)
+        params.gravity = Gravity.CENTER_VERTICAL | Gravity.END; // วางไว้ขอบขวาตรงกลาง
+        
         agentButton.setOnClickListener(v -> {
-            if (!isRecording) {
-                startListening();
-            } else {
-                stopListeningAndProcess();
+            isActive = !isActive;
+            updateButtonState(isActive);
+            if (isActive) {
+                tts.speak("ระบบเชื่อมต่อประสาทพร้อมรับคำสั่ง", TextToSpeech.QUEUE_FLUSH, null, null);
             }
         });
 
@@ -70,41 +55,27 @@ public class AgentAccessibilityService extends AccessibilityService {
         floatingView = agentButton;
     }
 
-    private void startListening() {
-        isRecording = true;
-        agentButton.setText("🔴 กำลังฟัง...");
-        agentButton.setTextColor(Color.RED);
-        Toast.makeText(this, "เริ่มบันทึกเสียง...", Toast.LENGTH_SHORT).show();
+    private void updateButtonState(boolean active) {
+        agentButton.setText(active ? "◉ ACTIVE" : "○ NM-OS");
+        agentButton.setTextSize(12);
+        agentButton.setTextColor(active ? Color.parseColor("#00FFCC") : Color.WHITE);
         
-        // TODO: ในโลกจริง ต้องดึง Raw Audio ผ่าน AudioRecord ส่งเข้า JNI ให้ Whisper.cpp
-        // โค้ดเตรียมพร้อมโครงสร้าง AudioRecord ไว้แล้ว
-    }
-
-    private void stopListeningAndProcess() {
-        isRecording = false;
-        agentButton.setText("🤖 NONGMOL (กำลังคิด)");
-        agentButton.setTextColor(Color.YELLOW);
-        
-        // จำลองสถานการณ์: ส่งเสียงเข้าสมอง แล้วให้ระบบพูดตอบกลับ
-        Toast.makeText(this, "กำลังประมวลผลเสียง...", Toast.LENGTH_SHORT).show();
-        
-        // จำลอง AI พูดตอบกลับ
-        new android.os.Handler().postDelayed(() -> {
-            agentButton.setText("🤖 NONGMOL (กดเพื่อพูด)");
-            agentButton.setTextColor(Color.WHITE);
-            tts.speak("ได้รับคำสั่งเสียงแล้ว กำลังวิเคราะห์หน้าจอค่ะ", TextToSpeech.QUEUE_FLUSH, null, null);
-        }, 1500);
+        GradientDrawable gd = new GradientDrawable();
+        gd.setColor(active ? Color.parseColor("#CC000000") : Color.parseColor("#8810101A"));
+        gd.setCornerRadius(100f);
+        gd.setStroke(4, active ? Color.parseColor("#00FFCC") : Color.parseColor("#33FFFFFF"));
+        agentButton.setBackground(gd);
+        agentButton.setPadding(30, 30, 30, 30);
     }
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {}
     @Override
     public void onInterrupt() {}
-
     @Override
-    public boolean onUnbind(android.content.Intent intent) {
+    public void onDestroy() {
+        super.onDestroy();
         if (floatingView != null) windowManager.removeView(floatingView);
-        if (tts != null) { tts.stop(); tts.shutdown(); }
-        return super.onUnbind(intent);
+        if (tts != null) tts.shutdown();
     }
 }
